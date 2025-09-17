@@ -8,43 +8,47 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 
-class AttachmentController extends Controller {
+class AttachmentController extends Controller
+{
 
 
 
-    public function store(Request $request, Message $message): JsonResponse{
+    public function store(Request $request): JsonResponse
+    {
 
 
-    $data = $request->validate([
-    'file' => 'required|file|max: 20480'
-    ]);
+        $data = $request->validate([
+            'file' => 'required|file|max: 20480'
+        ]);
 
-    $file = $data['file'];
+        $file = $data['file'];
 
-    $path = $file->store('attachments', 'public');
+        $path = $file->store('attachments', 'public');
 
-    $attachment = new Attachment([
-        
-        'file_path' => $path,
-        'file_name' => $file->getClientOriginalName(),
-    ]);
+        $attachment = new Attachment([
 
-    $attachment->message()->associate($message);
-    $attachment->save();
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+        ]);
 
-    return response()->json([
-        'message' => 'Attachment uploaded',
-        'attachment' => $attachment,
-        'url' => Storage::url($attachment->file_path)
-    ]);
-}
+        $attachment->save();
 
-    public function index (Message $message): JsonResponse{
+      
+        return response()->json([
+            'message' => 'Attachment uploaded',
+            'attachment' => $attachment,
+            'url' => Storage::url($attachment->file_path)
+        ]);
+    }
+
+    public function index(Message $message): JsonResponse
+    {
         return response()->json($message->attachments);
     }
 
 
-    public function destroy(Attachment $attachment): JsonResponse{
+    public function destroy(Attachment $attachment): JsonResponse
+    {
         Storage::disk('public')->delete($attachment->file_path);
 
         $attachment->delete();

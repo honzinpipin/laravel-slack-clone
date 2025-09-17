@@ -8,18 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MessageReaction extends Model {
+class MessageReaction extends Model
+{
     use HasFactory;
 
     protected $fillable = [
         'emoji'
     ];
 
-    public function message(): BelongsTo{
+    public function message(): BelongsTo
+    {
         return $this->belongsTo(Message::class);
     }
 
-    public function user(): BelongsTo{
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 }

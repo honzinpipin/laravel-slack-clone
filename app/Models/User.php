@@ -22,7 +22,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        
+
     ];
 
     /**
@@ -49,15 +49,18 @@ class User extends Authenticatable
         ];
     }
 
-    public function messages(): HasMany{
+    public function messages(): HasMany
+    {
         return $this->hasMany(Message::class);
     }
 
-    public function conversations(): BelongsToMany{
+    public function conversations(): BelongsToMany
+    {
         return $this->belongsToMany(Conversation::class, 'conversation_user');
     }
 
-    public function messageReactions(): HasMany{
+    public function messageReactions(): HasMany
+    {
         return $this->hasMany(MessageReaction::class);
     }
 }
