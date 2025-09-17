@@ -6,30 +6,33 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller{
 
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
 {
     $users = User::all(); 
     return response()->json($users);
 }
 
 
-    public function register(Request $request){
+    public function register(Request $request): JsonResponse{
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $user = User::create([
+        $user = new User([
         'name' => $data['name'],
         'email' => $data['email'],
-        'password' => Hash::make($data['password']),
-        'api_token' => Str::random(80),
     ]);
+
+    $user->api_token = Str::random(80);
+    $user->password = Hash::make($data['password']);
+    $user->save();
 
     return response()->json([
         'user' => $user,
@@ -38,7 +41,7 @@ class UserController extends Controller{
     ]);
     }
 
-        public function login(Request $request){
+        public function login(Request $request): JsonResponse{
             $data = $request->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string',
@@ -62,7 +65,7 @@ class UserController extends Controller{
         }
 
 
-    public function logout(Request $request){
+    public function logout(Request $request): JsonResponse{
         $user = $request->user();
         $user->api_token = null;
         $user->save();

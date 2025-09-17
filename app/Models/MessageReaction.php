@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MessageReaction extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'message_id',
-        'user_id',
-        'emoji',
+        'emoji'
     ];
 
-    public function message(){
+    public function message(): BelongsTo{
         return $this->belongsTo(Message::class);
     }
 
-    public function user(){
+    public function user(): BelongsTo{
         return $this->belongsTo(User::class);
     }
 }

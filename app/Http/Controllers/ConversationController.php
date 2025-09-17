@@ -6,10 +6,11 @@ use App\Models\User;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
 use AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 
 class ConversationController extends Controller{
 
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $conversations = $request->user()
             ->conversations()
@@ -18,7 +19,7 @@ class ConversationController extends Controller{
         return response()->json($conversations);
     }
 
-    public function store(Request $request){
+    public function store(Request $request): JsonResponse{
         $data = $request->validate([
             'type' => 'required|in:private,group',
             'name' => 'nullable|string|max:255',
@@ -37,7 +38,7 @@ class ConversationController extends Controller{
     }
 
 
-    public function updateName(Request $request, Conversation $conversation){
+    public function updateName(Request $request, Conversation $conversation): JsonResponse{
         $this->authorize('update', $conversation);
 
         $data = $request->validate([
@@ -49,7 +50,7 @@ class ConversationController extends Controller{
     }
         
 
-    public function show(Request $request, Conversation $conversation){
+    public function show(Request $request, Conversation $conversation): JsonResponse{
     $this->authorize('view', $conversation);
 
     return response()->json(
@@ -63,7 +64,7 @@ class ConversationController extends Controller{
 }
 
 
-    public function destroy(Request $request, Conversation $conversation){
+    public function destroy(Request $request, Conversation $conversation): JsonResponse{
         $this->authorize('delete', $conversation);
 
         $conversation->delete();
