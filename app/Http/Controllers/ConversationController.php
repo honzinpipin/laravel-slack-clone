@@ -7,20 +7,24 @@ use App\Models\Conversation;
 use Illuminate\Http\Request;
 use AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use App\Http\Resources\ConversationResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
 
 class ConversationController extends Controller
 {
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $conversations = $request->user()
             ->conversations()
             ->with('users', 'messages.reactions', 'messages.attachments')
             ->get();
-        return response()->json($conversations);
+
+        return ConversationResource::collection($conversations);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): ConversationResource
     {
         $data = $request->validate([
             'type' => 'required|in:private,group',
@@ -36,11 +40,11 @@ class ConversationController extends Controller
 
         $conversation->users()->attach(array_merge([$request->user()->id], $data['user_ids']));
 
-        return response()->json($conversation->load('users'));
+        return new ConversationResource($conversation->load('users'));
     }
 
 
-    public function update(Request $request, Conversation $conversation): JsonResponse
+    public function update(Request $request, Conversation $conversation): ConversationResource
     {
         $this->authorize('update', $conversation);
 
@@ -49,22 +53,17 @@ class ConversationController extends Controller
         ]);
 
         $conversation->update(['name' => $data['name']]);
-        return response()->json($conversation);
+        return new ConversationResource($conversation);
     }
 
 
-    public function show(Request $request, Conversation $conversation): JsonResponse
+    public function show(Request $request, Conversation $conversation): ConversationResource
     {
         $this->authorize('view', $conversation);
 
-        return response()->json(
-            $conversation->load(
-                'users',
-                'messages',
-                'messages.reactions',
-                'messages.attachments'
-            )
-        );
+        $conversation->load('users', 'messages.reactions.user', 'messages.attachments');
+
+        return new ConversationResource($conversation);
     }
 
 

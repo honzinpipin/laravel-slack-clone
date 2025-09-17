@@ -7,19 +7,23 @@ use App\Models\Conversation;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Attachment;
+use App\Http\Resources\MessageResource;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 
 class MessageController extends Controller
 {
-    public function index(Conversation $conversation, Request $request): JsonResponse
+    public function index(Conversation $conversation, Request $request): AnonymousResourceCollection
     {
         $this->authorize('view', $conversation);
 
-        $messages = $conversation->messages()->with(['user', 'replies', 'reactions', 'attachments'])->get();
-        return response()->json($messages);
+        $messages = $conversation->messages()
+            ->with(['user', 'replies.user', 'reactions.user', 'attachments'])
+            ->get();
+        return MessageResource::collection($messages);
     }
 
-    public function store(Request $request, Conversation $conversation): JsonResponse
+    public function store(Request $request, Conversation $conversation): MessageResource
     {
         $this->authorize('view', $conversation);
 
@@ -43,11 +47,11 @@ class MessageController extends Controller
                 ->whereNull('message_id')
                 ->update(['message_id' => $message->id]);
         }
-
-        return response()->json($message->load(['user', 'replies', 'reactions']));
+        $message->load(['user', 'replies.user', 'reactions.user', 'attachments']);
+        return new MessageResource($message);
     }
 
-    public function reply(Request $request, Message $message): JsonResponse
+    public function reply(Request $request, Message $message): MessageResource|JsonResponse
     {
         $data = $request->validate([
             'content' => 'required|string',
@@ -71,6 +75,8 @@ class MessageController extends Controller
         $reply->conversation()->associate($message->conversation);
         $reply->save();
 
-        return response()->json($reply->load(['user', 'replies', 'reactions']));
+        $reply->load(['user', 'replies.user', 'reactions.user', 'attachments']);
+
+        return new MessageResource($reply);
     }
 }
