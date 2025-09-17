@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 
-class ConversationController extends Controller{
+class ConversationController extends Controller
+{
 
     public function index(Request $request): JsonResponse
     {
@@ -19,7 +20,8 @@ class ConversationController extends Controller{
         return response()->json($conversations);
     }
 
-    public function store(Request $request): JsonResponse{
+    public function store(Request $request): JsonResponse
+    {
         $data = $request->validate([
             'type' => 'required|in:private,group',
             'name' => 'nullable|string|max:255',
@@ -38,33 +40,36 @@ class ConversationController extends Controller{
     }
 
 
-    public function updateName(Request $request, Conversation $conversation): JsonResponse{
+    public function update(Request $request, Conversation $conversation): JsonResponse
+    {
         $this->authorize('update', $conversation);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-       $conversation->update(['name' => $data['name']]);
-       return response()->json($conversation);
+        $conversation->update(['name' => $data['name']]);
+        return response()->json($conversation);
     }
-        
-
-    public function show(Request $request, Conversation $conversation): JsonResponse{
-    $this->authorize('view', $conversation);
-
-    return response()->json(
-        $conversation->load(
-            'users',
-            'messages',
-            'messages.reactions',
-            'messages.attachments'
-        )
-    );
-}
 
 
-    public function destroy(Request $request, Conversation $conversation): JsonResponse{
+    public function show(Request $request, Conversation $conversation): JsonResponse
+    {
+        $this->authorize('view', $conversation);
+
+        return response()->json(
+            $conversation->load(
+                'users',
+                'messages',
+                'messages.reactions',
+                'messages.attachments'
+            )
+        );
+    }
+
+
+    public function destroy(Request $request, Conversation $conversation): JsonResponse
+    {
         $this->authorize('delete', $conversation);
 
         $conversation->delete();

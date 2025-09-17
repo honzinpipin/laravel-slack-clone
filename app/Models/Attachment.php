@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Attachment extends Model {
+class Attachment extends Model
+{
     use HasFactory;
 
     protected $fillable = [
@@ -14,7 +15,9 @@ class Attachment extends Model {
         'file_name',
     ];
 
-    public function message(): BelongsTo{
+    public function message(): BelongsTo
+    {
         return $this->belongsTo(Message::class);
     }
+
 }
