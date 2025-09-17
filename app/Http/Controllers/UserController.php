@@ -7,15 +7,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Resources\UserResource;
 
 class UserController extends Controller
 {
 
 
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         $users = User::all();
-        return response()->json($users);
+        return UserResource::collection($users);
     }
 
 
@@ -37,7 +39,7 @@ class UserController extends Controller
         $user->save();
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'api_token' => $user->api_token
 
         ]);
@@ -62,7 +64,7 @@ class UserController extends Controller
 
 
         return response()->json([
-            'user' => $user,
+            'user' => new UserResource($user),
             'api_token' => $user->api_token
         ]);
     }

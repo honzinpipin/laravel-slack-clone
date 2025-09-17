@@ -7,13 +7,14 @@ use App\Models\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
+use App\Http\Resources\AttachmentResource;
 
 class AttachmentController extends Controller
 {
 
 
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): AttachmentResource
     {
 
 
@@ -33,17 +34,16 @@ class AttachmentController extends Controller
 
         $attachment->save();
 
-      
-        return response()->json([
-            'message' => 'Attachment uploaded',
-            'attachment' => $attachment,
-            'url' => Storage::url($attachment->file_path)
-        ]);
+
+
+
+        return new AttachmentResource($attachment);
     }
 
     public function index(Message $message): JsonResponse
     {
-        return response()->json($message->attachments);
+        $attachments = $message->attachments()->get();
+        return response()->json(AttachmentResource::collection($attachments));
     }
 
 
@@ -53,8 +53,6 @@ class AttachmentController extends Controller
 
         $attachment->delete();
 
-        return response()->json([
-            'message' => 'Attachment deleted'
-        ]);
+        return response()->json(['message' => 'Attachment deleted']);
     }
 }

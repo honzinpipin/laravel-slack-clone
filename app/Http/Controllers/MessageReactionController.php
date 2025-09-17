@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ReactionResource;
 use App\Models\Message;
 use App\Models\MessageReaction;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 class MessageReactionController extends Controller
 {
 
-    public function store(Request $request, Message $message): JsonResponse
+    public function store(Request $request, Message $message): ReactionResource
     {
         $data = $request->validate([
             'emoji' => 'required|string',
@@ -31,7 +32,9 @@ class MessageReactionController extends Controller
         $reaction->message()->associate($message);
         $reaction->save();
 
-        return response()->json($reaction);
+        $reaction->load('user');
+
+        return new ReactionResource($reaction);
     }
 
     public function destroy(Request $request, Message $message, $emoji): JsonResponse
