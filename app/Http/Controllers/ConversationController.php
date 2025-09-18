@@ -21,7 +21,8 @@ class ConversationController extends Controller
         $conversations = $request->user()
             ->conversations()
             ->with('users', 'messages.reactions', 'messages.attachments')
-            ->get();
+            ->orderBy('id','desc')
+            ->paginate(10);
 
         return ConversationResource::collection($conversations);
     }

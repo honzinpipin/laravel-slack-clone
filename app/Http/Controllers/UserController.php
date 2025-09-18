@@ -18,7 +18,9 @@ class UserController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $users = User::all();
+        $users = User::query()
+        ->orderBy('id','asc')
+        ->paginate(20);
         return UserResource::collection($users);
     }
 
