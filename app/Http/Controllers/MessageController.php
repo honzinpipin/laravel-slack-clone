@@ -23,7 +23,6 @@ class MessageController extends Controller
             ->with(['user', 'replies.user', 'reactions.user', 'attachments'])
             ->orderBy('created_at','desc')
             ->paginate(20);
-            
         return MessageResource::collection($messages);
     }
 
@@ -33,13 +32,12 @@ class MessageController extends Controller
         $data = $request->validated();
 
 
-        $message = new Message([
-            'content' => $data['content']
+        $message = $conversation->messages()->create([
+            'content' => $data['content'],
+            'user_id' => $request->user()->id,
+            'parent_message_id' => $data['parent_message_id'] ?? null,
         ]);
 
-        $message->conversation()->associate($conversation);
-        $message->user()->associate($request->user());
-        $message->save();
 
         if (!empty($data['attachment_ids'])) {
             Attachment::whereIn('id', $data['attachment_ids'])
@@ -51,25 +49,41 @@ class MessageController extends Controller
         return new MessageResource($message);
     }
 
-    public function reply(ReplyToMessageRequest $request, Message $message): MessageResource|JsonResponse
+    public function show(Conversation $conversation, Message $message): array{
+        $this->authorize('view', $conversation);
+
+        $message->load(['user', 'reactions.user', 'attachments']);  
+
+        $replies = $message->replies()
+            ->with(['user', 'reactions.user', 'attachments'])
+            ->orderBy('created_at','asc')
+            ->paginate(20);
+
+        return [
+        'message' => new MessageResource($message),
+        'replies' => MessageResource::collection($replies),
+        'pagination' => [
+            'current_page' => $replies->currentPage(),
+            'last_page' => $replies->lastPage(),
+            'per_page' => $replies->perPage(),
+            'total' => $replies->total(),
+        ],
+    ];
+    }
+
+
+    public function destroy(Conversation $conversation, Message $message): JsonResponse
     {
-        $data = $request->validated();
+        $this->authorize('delete', $message);
 
+        if($message->conversation_id !== $conversation->id){
+            return response()->json(['message' => 'Message does not belong to this conversation'], 422);
+        } 
 
+        $message->replies()->delete();
+        $message->attachments()->delete();
+        $message->delete();
 
-
-
-        $reply = new Message([
-            'content' => $data['content'],
-            'parent_message_id' => $message->id,
-        ]);
-
-        $reply->user()->associate($request->user());
-        $reply->conversation()->associate($message->conversation);
-        $reply->save();
-
-        $reply->load(['user', 'replies.user', 'reactions.user', 'attachments']);
-
-        return new MessageResource($reply);
+        return response()->json(['message' => 'Message deleted']);
     }
 }
