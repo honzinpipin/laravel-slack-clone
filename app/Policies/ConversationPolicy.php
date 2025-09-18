@@ -21,7 +21,7 @@ class ConversationPolicy
      */
    public function view(User $user, Conversation $conversation): bool
 {
-    return $conversation->users->contains($user->id);
+    return $conversation->users()->whereKey($user->id)->exists();
 }
 
 
@@ -36,17 +36,17 @@ class ConversationPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Conversation $conversation)
+    public function update(User $user, Conversation $conversation): bool
     {
-        return $conversation->users()->where('users.id', $user->id)->exists();
+        return $this->view($user, $conversation);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Conversation $conversation)
+    public function delete(User $user, Conversation $conversation): bool
     {
-        return $conversation->type === 'private' && $conversation->users->contains($user->id);
+        return $conversation->type === 'private' && $conversation->users()->whereKey($user->id)->exists();
     }
 
     /**

@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Http\Resources\UserResource;
+use App\Http\Requests\UserRegisterRequest;
+use App\Http\Requests\UserLoginRequest;
 
 class UserController extends Controller
 {
@@ -21,13 +23,9 @@ class UserController extends Controller
     }
 
 
-    public function register(Request $request): JsonResponse
+    public function register(UserRegisterRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        $data = $request->validated();
 
         $user = new User([
             'name' => $data['name'],
@@ -45,12 +43,9 @@ class UserController extends Controller
         ]);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(UserLoginRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        $data = $request->validated();
 
         $user = User::where('email', $data['email'])->first();
 
