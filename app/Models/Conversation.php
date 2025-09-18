@@ -13,7 +13,7 @@ class Conversation extends Model
 
     protected $fillable = [
         'name',
-        'type',
+        
     ];
 
     public function users(): BelongsToMany
