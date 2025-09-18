@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\AttachmentResource;
 use App\Http\Requests\StoreAttachmentRequest;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class AttachmentController extends Controller
 {
@@ -40,10 +41,13 @@ class AttachmentController extends Controller
         return new AttachmentResource($attachment);
     }
 
-    public function index(Message $message): JsonResponse
+    public function index(Message $message): AnonymousResourceCollection
     {
-        $attachments = $message->attachments()->get();
-        return response()->json(AttachmentResource::collection($attachments));
+        $attachments = $message->attachments()
+        ->orderBy('created_at', 'desc')
+        ->paginate(20);
+
+        return AttachmentResource::collection($attachments);
     }
 
 

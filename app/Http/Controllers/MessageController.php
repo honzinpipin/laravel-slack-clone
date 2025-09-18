@@ -21,7 +21,9 @@ class MessageController extends Controller
 
         $messages = $conversation->messages()
             ->with(['user', 'replies.user', 'reactions.user', 'attachments'])
-            ->get();
+            ->orderBy('created_at','desc')
+            ->paginate(20);
+            
         return MessageResource::collection($messages);
     }
 
