@@ -11,6 +11,10 @@ use App\Http\Resources\ConversationResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use App\Http\Requests\StoreConversationRequest;
 use App\Http\Requests\UpdateConversationRequest;
+use App\Http\Resources\MessageResource;
+use App\Http\Requests\addUserRequest;
+use App\Http\Requests\removeUserRequest;
+
 
 
 class ConversationController extends Controller
@@ -20,8 +24,8 @@ class ConversationController extends Controller
     {
         $conversations = $request->user()
             ->conversations()
-            ->with('users', 'messages.reactions', 'messages.attachments')
-            ->orderBy('id','desc')
+            ->with('users')
+            ->orderBy('id', 'desc')
             ->paginate(10);
 
         return ConversationResource::collection($conversations);
@@ -48,7 +52,7 @@ class ConversationController extends Controller
         $data = $request->validated();
 
         $conversation->update(['name' => $data['name']]);
-        return new ConversationResource($conversation);
+        return new ConversationResource($conversation->load('users'));
     }
 
 
@@ -56,9 +60,15 @@ class ConversationController extends Controller
     {
         $this->authorize('view', $conversation);
 
-        $conversation->load('users', 'messages.reactions.user', 'messages.attachments');
+        $conversation->load('users');
 
-        return new ConversationResource($conversation);
+        $messages = $conversation->messages()
+            ->with(['user', 'attachments', 'reactions.user'])
+            ->orderBy('id', 'asc')
+            ->paginate(20);
+
+        return (new ConversationResource($conversation))
+            ->additional(['messages' => MessageResource::collection($messages)]);
     }
 
 
@@ -69,5 +79,26 @@ class ConversationController extends Controller
         $conversation->delete();
 
         return response()->json(['message' => 'Conversation deleted']);
+    }
+
+
+    public function addUser(addUserRequest $request, Conversation $conversation)
+    {
+        $data = $request->validated();
+
+        $conversation->user()->syncWithoutDetaching($data['user_id']);
+
+        return response()->json(['message' => 'User added successfully']);
+    }
+
+
+    public function removeUser(removeUserRequest $request, Conversation $conversation)
+    {
+
+        $data = $request->validated();
+
+        $conversation->users()->detach($data['user_id']);
+
+        return response()->json(['message' => 'User removed successfully']);
     }
 }

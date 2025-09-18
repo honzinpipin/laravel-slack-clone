@@ -23,8 +23,6 @@ class ConversationResource extends JsonResource
 
             "users" => UserResource::collection($this->whenLoaded('users')),
 
-            "messages" => MessageResource::collection($this->whenLoaded('messages')),
-
             "created_at" => $this->created_at->toDateTimeString(),
         ];
     }
