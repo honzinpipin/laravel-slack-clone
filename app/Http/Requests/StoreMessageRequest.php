@@ -27,6 +27,7 @@ class StoreMessageRequest extends FormRequest
             "content" => "required|string|max:1000",
             "attachment_ids" => "nullable|array",
             "attachment_ids.*" => "exists:attachments,id",
+            'parent_message_id' => 'nullable|integer|exists:messages,id'
         ];
     }
 }
