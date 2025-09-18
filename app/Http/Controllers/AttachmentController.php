@@ -8,19 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\AttachmentResource;
+use App\Http\Requests\StoreAttachmentRequest;
 
 class AttachmentController extends Controller
 {
 
 
 
-    public function store(Request $request): AttachmentResource
+    public function store(StoreAttachmentRequest $request): AttachmentResource
     {
 
 
-        $data = $request->validate([
-            'file' => 'required|file|max: 20480'
-        ]);
+        $data = $request->validated();
 
         $file = $data['file'];
 
@@ -32,6 +31,7 @@ class AttachmentController extends Controller
             'file_name' => $file->getClientOriginalName(),
         ]);
 
+        $attachment->user()->associate($request->user());
         $attachment->save();
 
 

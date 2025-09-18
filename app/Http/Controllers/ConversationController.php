@@ -9,6 +9,8 @@ use AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\ConversationResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Requests\StoreConversationRequest;
+use App\Http\Requests\UpdateConversationRequest;
 
 
 class ConversationController extends Controller
@@ -24,14 +26,9 @@ class ConversationController extends Controller
         return ConversationResource::collection($conversations);
     }
 
-    public function store(Request $request): ConversationResource
+    public function store(StoreConversationRequest $request): ConversationResource
     {
-        $data = $request->validate([
-            'type' => 'required|in:private,group',
-            'name' => 'nullable|string|max:255',
-            'user_ids' => 'required|array|min:1',
-            'user_ids.*' => 'exists:users,id',
-        ]);
+        $data = $request->validated();
 
         $conversation = Conversation::create([
             'type' => $data['type'],
@@ -44,13 +41,10 @@ class ConversationController extends Controller
     }
 
 
-    public function update(Request $request, Conversation $conversation): ConversationResource
+    public function update(UpdateConversationRequest $request, Conversation $conversation): ConversationResource
     {
-        $this->authorize('update', $conversation);
 
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $data = $request->validated();
 
         $conversation->update(['name' => $data['name']]);
         return new ConversationResource($conversation);

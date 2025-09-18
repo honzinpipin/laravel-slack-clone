@@ -7,16 +7,14 @@ use App\Models\Message;
 use App\Models\MessageReaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use App\Http\Requests\StoreMessageReactionRequest;
 
 class MessageReactionController extends Controller
 {
 
-    public function store(Request $request, Message $message): ReactionResource
+    public function store(StoreMessageReactionRequest $request, Message $message): ReactionResource
     {
-        $data = $request->validate([
-            'emoji' => 'required|string',
-        ]);
+        $data = $request->validated();
 
         MessageReaction::where('message_id', $message->id)
             ->where('user_id', $request->user()->id)

@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Attachment;
 use App\Http\Resources\MessageResource;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Http\Requests\StoreMessageRequest;
+use App\Http\Requests\ReplyToMessageRequest;
 
 
 class MessageController extends Controller
@@ -23,19 +25,14 @@ class MessageController extends Controller
         return MessageResource::collection($messages);
     }
 
-    public function store(Request $request, Conversation $conversation): MessageResource
+    public function store(StoreMessageRequest $request, Conversation $conversation): MessageResource
     {
-        $this->authorize('view', $conversation);
 
-        $data = $request->validate([
-            'content' => 'required|string',
-            'attachment_ids' => 'nullable|array',
-            'attachment_ids.*' => 'exists:attachments,id',
-        ]);
+        $data = $request->validated();
 
 
         $message = new Message([
-            'content' => $data['content'],
+            'content' => $data['content']
         ]);
 
         $message->conversation()->associate($conversation);
@@ -47,23 +44,17 @@ class MessageController extends Controller
                 ->whereNull('message_id')
                 ->update(['message_id' => $message->id]);
         }
+
         $message->load(['user', 'replies.user', 'reactions.user', 'attachments']);
         return new MessageResource($message);
     }
 
-    public function reply(Request $request, Message $message): MessageResource|JsonResponse
+    public function reply(ReplyToMessageRequest $request, Message $message): MessageResource|JsonResponse
     {
-        $data = $request->validate([
-            'content' => 'required|string',
-        ]);
+        $data = $request->validated();
 
-        $this->authorize('view', $message->conversation);
 
-        if ($message->conversation_id !== $message->conversation->id) {
-            return response()->json([
-                'error' => 'Invalid conversation: message does not belong to this conversation.'
-            ], 422);
-        }
+
 
 
         $reply = new Message([
