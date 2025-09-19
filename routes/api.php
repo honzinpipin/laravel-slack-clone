@@ -48,8 +48,6 @@ Route::middleware('auth:api')->group(function () {
         //Přidat reakci
         Route::post('reactions', [MessageReactionController::class, 'store']);
 
-        //Odpovědět na zprávu
-        Route::post('reply', [MessageController::class, 'reply']);
 
     });
 
