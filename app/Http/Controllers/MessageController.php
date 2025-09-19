@@ -32,11 +32,12 @@ class MessageController extends Controller
         $data = $request->validated();
 
 
-        $message = $conversation->messages()->create([
+        $message = new Message([
             'content' => $data['content'],
             'parent_message_id' => $data['parent_message_id'] ?? null,
         ]);
-
+        
+        $message->conversation()->associate($conversation);
         $message->user()->associate($request->user());
         $message->save();
 
