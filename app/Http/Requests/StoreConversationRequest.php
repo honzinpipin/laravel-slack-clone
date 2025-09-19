@@ -27,8 +27,8 @@ class StoreConversationRequest extends FormRequest
             "user_ids" => "required|array|min:1|distinct",
             "user_ids.*" => [
                 'exists:users,id',
-                function($attribude, $value, $fail){
-                    if($value == $this->user()->id){
+                function ($attribude, $value, $fail) {
+                    if ($value == $this->user()->id) {
                         $fail("You cannot add yourself to the conversation.");
                     }
                 }

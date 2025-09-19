@@ -36,7 +36,7 @@ class MessageController extends Controller
             'content' => $data['content'],
             'parent_message_id' => $data['parent_message_id'] ?? null,
         ]);
-        
+
         $message->conversation()->associate($conversation);
         $message->user()->associate($request->user());
         $message->save();
