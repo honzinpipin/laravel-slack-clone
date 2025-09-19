@@ -27,7 +27,6 @@ class AttachmentController extends Controller
         $path = $file->store('attachments', 'public');
 
         $attachment = new Attachment([
-
             'file_path' => $path,
             'file_name' => $file->getClientOriginalName(),
         ]);
@@ -37,15 +36,14 @@ class AttachmentController extends Controller
 
 
 
-
         return new AttachmentResource($attachment);
     }
 
     public function index(Message $message): AnonymousResourceCollection
     {
         $attachments = $message->attachments()
-        ->orderBy('created_at', 'desc')
-        ->paginate(20);
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
 
         return AttachmentResource::collection($attachments);
     }

@@ -35,10 +35,11 @@ class ConversationController extends Controller
     {
         $data = $request->validated();
 
-        $conversation = Conversation::create([
+        $conversation = new Conversation([
             'type' => $data['type'],
             'name' => $data['name'] ?? null,
         ]);
+        $conversation->save();
 
         $conversation->users()->attach(array_merge([$request->user()->id], $data['user_ids']));
 

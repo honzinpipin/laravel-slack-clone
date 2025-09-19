@@ -22,7 +22,7 @@ class MessageReactionController extends Controller
             ->delete();
 
 
-        $reaction = new MessageReaction([
+        $reaction = MessageReaction::create([
             'emoji' => $data['emoji'],
         ]);
 
