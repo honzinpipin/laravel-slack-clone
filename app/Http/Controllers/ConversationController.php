@@ -83,7 +83,7 @@ class ConversationController extends Controller
     }
 
 
-    public function addUser(addUserRequest $request, Conversation $conversation)
+    public function addUser(addUserRequest $request, Conversation $conversation): JsonResponse
     {
         $data = $request->validated();
 
@@ -93,7 +93,7 @@ class ConversationController extends Controller
     }
 
 
-    public function removeUser(removeUserRequest $request, Conversation $conversation)
+    public function removeUser(removeUserRequest $request, Conversation $conversation): JsonResponse
     {
 
         $data = $request->validated();
