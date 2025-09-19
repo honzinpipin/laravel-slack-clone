@@ -24,12 +24,15 @@ class StoreConversationRequest extends FormRequest
         return [
             "type" => "required|in:private,group",
             "name" => "nullable|string|max:20",
-            "user_ids" => ["required|array|min:1|distinct", function ($attribute, $value, $fail){
-                if(in_array($this->user()->id, $value)){
-                    $fail("You cannot add yourself to the conversation");
+            "user_ids" => "required|array|min:1|distinct",
+            "user_ids.*" => [
+                'exists:users,id',
+                function($attribude, $value, $fail){
+                    if($value == $this->user()->id){
+                        $fail("You cannot add yourself to the conversation.");
+                    }
                 }
-            }],
-            "user_ids.*" => "exists:users,id",
+            ]
         ];
     }
 }
